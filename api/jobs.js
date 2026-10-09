@@ -1,20 +1,15 @@
 ﻿export default async function handler(req, res) {
-  const API_BASE = 'https://api.jobopportunitiesapi.org/v1/jobs';
-  const KEY = (process.env.JOB_OPPORTUNITIES_API_KEY || process.env.JOB_OPPORTUN_IES_API_KEY || process.env.JOB_API_KEY || process.env.JOA_API_KEY || '').trim();
-
+  const KEY = (process.env.JOB_OPPORTUNITIES_API_KEY || '').trim();
   if (!KEY) {
-    return res.status(500).json({ error: 'API key not set in env - add JOB_OPPORTUNITIES_API_KEY in Vercel' });
+    return res.status(500).json({ error: 'API key not set - add JOB_OPPORTUNITIES_API_KEY with sk_live_... in Vercel' });
   }
-
-  const query = req.url.includes('?')? req.url.split('?')[1] : 'country=DE&limit=20';
-  const url = query? API_BASE + '?' + query : API_BASE;
-
+  const rawQuery = req.url.includes('?')? req.url.split('?')[1] : '';
+  const query = rawQuery || 'limit=25';
+  const API_BASE = 'https://api.jobopportunitiesapi.org/v1/jobs';
+  const url = `${API_BASE}?${query}`;
   try {
     const r = await fetch(url, {
-      headers: {
-        'Authorization': 'Bearer ' + KEY,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' }
     });
     const data = await r.text();
     res.setHeader('Content-Type', 'application/json');
